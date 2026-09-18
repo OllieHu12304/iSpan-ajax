@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajax_Flask 專案</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+</head>
+
+<body>
+    {% include '_navbar.html' %}
+    <div class="container mt-3">
+        <h3>JSON 練習</h3>
+
+        <button id="button1" class="btn btn-secondary mb-3">Load Data</button>
+
+
+        <div id="userList">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Age</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+            crossorigin="anonymous"></script>
+        <script src="/static/scripts/travel.js"></script>
+        <script>
+
+            const users = [
+                { "id": 1, "UserName": "Alice", "UserEmail": "alice@company.com", "age": 28 },
+                { "id": 2, "UserName": "Bob", "UserEmail": "bob@company.com", "age": 34 },
+                { "id": 3, "UserName": "Charlie", "UserEmail": "charlie@company.com", "age": 22 }]
+
+
+            //步驟一 找到要控制的對象(HTML 標籤)
+            const btn = document.querySelector('#button1');
+            const divUser = document.querySelector('#userList tbody');
+
+            //步驟二 甚麼時候做
+            //使用者行為 按下按鈕 click、滑鼠移動 mousemove、鍵盤輸入 keydown、keyup => 事件 Event
+            //function(){} => ()=>{}  箭頭函式
+            btn.addEventListener('click', () => {
+                //步驟三 做甚麼
+                //內容、樣式的改變
+                // btn.textContent = 'loading...';
+                // btn.style.backgroundColor = 'yellow';
+
+                //讀取 JSON 資料
+                // //[] array 物件陣列[index]
+                // console.log(users[0]);  //{ "id": 1, "UserName": "Alice", "UserEmail": "alice@company.com", "age": 28 }
+
+                // //{} object 物件 {key:value,key:value} => obj.key => value
+                // console.log(users[0].UserName);  //Alice
+
+                // console.log(users[1].id); //2
+                // console.log(users[1].UserName); //Bob
+                // console.log(users[1].UserEmail); //bob@company.com
+                // console.log(users[1].age); //34
+
+                //for()
+                //for ... of
+                //for ... in
+                //Array.forEach()
+                //Array.map()
+                //Array.filter()
+
+                // users.forEach((value, idx, arr) => {
+                //     console.log(arr);
+                // })
+
+                //資料顯示在網頁上
+                // users.forEach((user) => {
+                //     // console.log(user.id);
+                //     // console.log(user.UserName);
+                //     // console.log(user.UserEmail);
+                //     // console.log(user.age);
+
+                //     divUser.innerHTML += '<li>' + user.UserName + '</li><li>' + user.UserEmail + '</li>';
+                // })
+
+                const userLi = users.map((user) => {
+                    return (`
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.UserName}</td>
+                            <td>${user.UserEmail}</td>
+                            <td>${user.age}</td>
+                        </tr>
+                     
+                    `)
+                })
+
+                divUser.innerHTML = userLi.join('');
+
+
+
+
+
+
+            })
+
+
+
+
+
+
+        </script>
+</body>
+
+</html>

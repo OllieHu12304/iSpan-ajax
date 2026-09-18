@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajax_Flask 專案</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+
+    </style>
+</head>
+
+<body>
+    {% include '_navbar.html' %}
+    <div class="container">
+
+
+        <div class="container mt-5">
+            <!-- <div class="row justify-content-center"> -->
+            <button id="buttonStart" class="btn btn-primary">Ajax 開始</button>
+            <button id="buttonEnd" class="btn btn-secondary">Ajax 結束</button>
+            <img id="img1" src="static/images/Loading.gif" style="display: none;" alt="載入中..." />
+
+
+            <div id="divInfo" class="alert mt-5"></div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+
+        const apiUrl = 'http://127.0.0.1:5000/api/hello';
+
+        //步驟一找到要控制的標籤
+        const btnStart = document.querySelector('#buttonStart');
+        const btnEnd = document.querySelector('#buttonEnd');
+        const div1 = document.querySelector('#divInfo');
+        const imgLoading = document.querySelector('#img1');
+
+        let abortController;
+
+        btnEnd.addEventListener('click', () => {
+            if (abortController) {
+                abortController.abort(); //停止api呼叫
+            }
+        })
+
+
+        //步驟二甚麼時候做 按下按鈕 => click
+        btnStart.addEventListener('click', async () => {
+            //步驟三做甚麼  
+            //呼叫 API
+            try {
+                //建立AbortController 物件
+                abortController = new AbortController();
+                const signal = abortController.signal;
+
+                imgLoading.style.display = 'inline';  //顯示執行中的圖示
+                btnStart.disabled = true; //停用按鈕功能
+
+                const response = await fetch(apiUrl, { signal });  //response物件 => header + body
+                if (!response.ok) throw new Error('API 呼叫錯誤')
+
+                const data = await response.json(); //從 Response Body取出JSON格式的資料
+                div1.innerHTML = `<h2>${data.message}</h2>`
+
+
+            } catch (error) {
+                let message = error.message;
+                if (error.name === 'AbortError') {
+                    message = "您停止了程式的執行"
+                }
+
+                div1.innerHTML = `錯誤訊息：${message}`
+
+            } finally {
+                imgLoading.style.display = 'none'; //隱藏執行中的圖示
+                btnStart.disabled = false; //啟用按鈕功能
+            }
+
+
+
+
+            // const data = await response.json(); 
+
+            // //todo 讀出JSON資料顯示在網頁上
+            // div1.innerHTML = `<h2>${data.message}</h2>`;
+
+            // if (response.ok) {
+            //     const data = await response.json(); //從 Response Body取出JSON格式的資料
+
+            //     //todo 讀出JSON資料顯示在網頁上
+            //     div1.innerHTML = `<h2>${data.message}</h2>`;
+            // } else {
+            //     if (response.status == "404") {
+            //         alert('找不到API')
+            //     } else if (response.status == "403") {
+            //         alert('禁止存取!!')
+            //     } else {
+            //         alert('有錯!!')
+            //     }
+
+            // }
+
+
+
+
+
+
+
+            //console.log(fetch(apiUrl)); // fetch(url) 得到的是一個Promise物件
+            // () => {}  response=>{}  (response)=>{} (a,b)=>{}
+
+            // fetch(apiUrl)
+            //     .then((response) => {
+            //         console.log(response);
+            //         console.log(response.ok);
+            //         console.log(response.status);
+            //         console.log(response.headers.get('content-type'));
+            //         console.log(response.headers.get('content-length'));
+            //         return response.json();  //要從Response body 取出裡面的JSON資料
+            //     })
+            //     .then((data) => {
+            //         console.log(data);
+            //         console.log(data.message);
+            //     })
+
+            // fetch(apiUrl)
+            //     .then(response => response.json())
+            //     .then(data => console.log(data.message));
+
+        })
+
+
+
+
+
+
+
+
+        //想想看蛋、咖啡、吐司印出的順序與時間
+
+        // //Demo1
+        // setTimeout(function () {
+        //     console.log('蛋');
+        // }, 1000);
+        // setTimeout(function () {
+        //     console.log('咖啡');
+        // }, 1000);
+        // setTimeout(function () {
+        //     console.log('土司');
+        // }, 1000);
+
+        //Demo2
+        // setTimeout(function () {
+        //     console.log('蛋');
+        // }, 3000);
+        // setTimeout(function () {
+        //     console.log('咖啡');
+        // }, 2000);
+        // setTimeout(function () {
+        //     console.log('土司');
+        // }, 1000);
+
+        // //Demo3
+        // setTimeout(function () {
+        //     console.log('蛋');
+        //     setTimeout(function () {
+        //         console.log('咖啡');
+        //         setTimeout(function () {
+        //             console.log('土司');
+        //         }, 1000);
+        //     }, 1000);
+        // }, 1000);
+
+
+
+
+        function printSomething(data) {
+            const promise = new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    resolve(data)
+                }, 1000);
+            })
+            return promise;
+        }
+
+
+
+        // //Demo4 promise 寫法
+        // printSomething('蛋')
+        //     .then((data) => {
+        //         console.log(data);
+        //         return printSomething('咖啡');
+        //     })
+        //     .then((data) => {
+        //         console.log(data);
+        //         return printSomething('土司');
+        //     }).then((data) => {
+        //         console.log(data);
+        //         return printSomething('培根');
+        //     }).then((data) => {
+        //         console.log(data);
+        //     })
+
+
+        // // aync/await 寫法
+        // async function demo5() {
+        //     let data = await printSomething("蛋");
+        //     console.log(data);
+        //     data = await printSomething("咖啡");
+        //     console.log(data);
+        //     data = await printSomething("土司");
+        //     console.log(data);
+        //     data = await printSomething("培根");
+        //     console.log(data);
+        // }
+
+        // demo5();
+
+
+
+    </script>
+</body>
+
+</html>
