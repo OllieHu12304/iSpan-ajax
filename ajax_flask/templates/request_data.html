@@ -16,7 +16,7 @@
         <h2 class="display-6 fw-bold text-secondary mb-4 pb-2 border-bottom">
             <i class="bi bi-image-fill me-2"></i>透過 fetch() 呼叫 api 時還需要傳遞資料給 api，api 又要如何接收這些資料？
         </h2>
-        <form id="userForm">
+        <form id="userForm" enctype="">
             <div class="row g-2 mb-3">
                 <div class="col-4">
                     <input type="text" name="name" id="userName" class="form-control" placeholder="輸入姓名">
@@ -24,12 +24,17 @@
                 <div class="col-4">
                     <input type="number" name="age" id="userAge" class="form-control" placeholder="輸入年紀">
                 </div>
+                <div class="col-4">
+                    <input type="email" name="userMail" id="userEmail" class="form-control" placeholder="輸入電子郵件">
+                </div>
             </div>
         </form>
         <button id="buttonQuery" class="btn btn-primary mb-3">透過 URL QueryString 傳遞資料</button>
         <button id="buttonPath" class="btn btn-primary mb-3">透過 URL Path 傳遞資料</button>
         <button id="buttonForm" class="btn btn-primary mb-3">資料包在 FormData 中傳遞</button>
         <button id="buttonJson" class="btn btn-primary mb-3">資料包在 JSON 中傳遞 </button>
+        <button id="buttonUpdate" class="btn btn-secondary mb-3">修改(PUT)</button>
+        <button id="buttonDelete" class="btn btn-secondary mb-3">刪除(DELETE)</button>
 
         <h2 class="display-6 fw-bold text-secondary my-4 pb-2 border-bottom">
             <i class="bi bi-image-fill me-2"></i>上傳圖片
@@ -43,12 +48,48 @@
             <img id="img1" class="img-fluid rounded border shadow-sm" style="width: 300px; height: auto;"
                 src="static/images/empty.png" />
         </div>
+        <hr />
+        <select id="selectCity"></select>
+        <select id="selectDistricts"></select>
         <div id="divInfo" class="alert alert-info mt-5"></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
         crossorigin="anonymous"></script>
+
     <script>
+
+        //IIFE
+
+        (async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/cities')
+
+                if (!response.ok) throw Error("有問題!!")
+
+                const datas = await response.json();
+                console.log(datas);
+                //datas => JSON 物件
+                //讀取JSON資料
+                //資料顯示在網頁上
+
+                const cities = datas.map(city => `<option value="${city}">${city}</option>`)
+                selCity.innerHTML = cities.join('');
+                loadDistricts();
+
+            } catch (err) {
+                console.log(err.message)
+
+            } finally {
+
+
+            }
+
+        })();
+
+        const selCity = document.querySelector('#selectCity');
+        const selDistricts = document.querySelector('#selectDistricts');
+
         const btnQuery = document.querySelector('#buttonQuery');
         const btnPath = document.querySelector('#buttonPath');
         const btnForm = document.querySelector('#buttonForm');
@@ -57,20 +98,96 @@
         const fileInput = document.querySelector('#fileInput');
         const inpName = document.querySelector('#userName');
         const inpAge = document.querySelector('#userAge');
+        const inpEmail = document.querySelector('#userEmail');
         const frmUser = document.querySelector('#userForm');
 
         const divInfo = document.querySelector('#divInfo');
         const theImg = document.querySelector('#img1');
 
-        btnQuery.addEventListener('click', async () => {
+        const btnUpdate = document.querySelector('#buttonUpdate');
+        const btnDelete = document.querySelector('#buttonDelete');
 
+
+        //修改Demo
+        btnUpdate.addEventListener('click', async () => {
+            const formData = new FormData();
+            formData.append('Name', 'Jim');
+            formData.append('Email', 'Jim@gmail.com');
+
+            const apiUrl = 'http://127.0.0.1:5000/api/members/1014';
+            const response = await fetch(apiUrl, {
+                method: 'PUT',
+                body: formData
+            })
+            const data = await response.json();
+            divInfo.textContent = JSON.stringify(data);
+
+        })
+        //刪除Demo
+        btnDelete.addEventListener('click', async () => {
+            const apiUrl = 'http://127.0.0.1:5000/api/members/1016';
+            const response = await fetch(apiUrl, {
+                method: 'DELETE'
+            })
+            const data = await response.json();
+            divInfo.textContent = JSON.stringify(data);
+        })
+
+
+
+
+        //使用者選取了不同city就會觸發change事件
+        selCity.addEventListener('change', () => {
+            divInfo.textContent = selCity.value;
+            loadDistricts();
+        })
+
+        selDistricts.addEventListener('change', () => {
+            divInfo.textContent = selDistricts.value;
+        })
+
+
+
+        //QueryString
+        btnQuery.addEventListener('click', async () => {
+            const response = await fetch(`http://127.0.0.1:5000/api/demo/query?name=${inpName.value}&age=${inpAge.value}&email=${inpEmail.value}`);
+            const user = await response.json(); //{}
+            // console.log(user.name)
+            // console.log(user.age)
+            // console.log(user.email)
+            divInfo.textContent = JSON.stringify(user);
         });
 
         btnPath.addEventListener('click', async () => {
+            const response = await fetch(`http://127.0.0.1:5000/api/demo/path/${inpName.value}/${inpAge.value}/${inpEmail.value}`);
+            const user = await response.json();
+            divInfo.textContent = JSON.stringify(user);
 
         });
 
+        //透過FormData傳送資料
         btnForm.addEventListener('click', async () => {
+            const formData = new FormData(frmUser);
+            formData.append('password', '123456');
+
+
+            const apiUrl = 'http://127.0.0.1:5000/api/demo/form';
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',  //HTTP PUT、DELETE
+                body: formData
+            });
+
+            const datas = await response.json();
+            divInfo.textContent = JSON.stringify(datas);
+
+
+
+            // //讀取formData中的資料
+            // for (const pair of formData.entries()) {
+            //     console.log(pair[0]);
+            //     console.log(pair[1]);
+            // }
 
         });
 
@@ -79,12 +196,39 @@
                 name: 'Steve',
                 age: 30
             };
+
+            const apiUrl = 'http://127.0.0.1:5000/api/demo/json';
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            const datas = await response.json();
+            divInfo.textContent = JSON.stringify(datas);
+
         });
 
 
 
         //檔案上傳
         btnUpload.addEventListener('click', async () => {
+            const formData = new FormData();
+            const file = fileInput.files[0]  //讀取選取的檔案
+            if (!file) {
+                alert('請選擇檔案');
+                return
+            }
+            formData.append('image', file);
+
+            const apiUrl = 'http://127.0.0.1:5000/api/demo/image';
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                body: formData
+            })
+            const datas = await response.json();
+            divInfo.textContent = JSON.stringify(datas);
 
         })
 
@@ -101,6 +245,21 @@
             reader.readAsDataURL(file);  // 將檔案轉為 base64 URI
 
         })
+
+        //根據城市名稱載入鄉鎮區的資料
+        const loadDistricts = async () => {
+            console.log(selCity.value);
+            const apiUrl = `http://127.0.0.1:5000/api/districts?city=${selCity.value}`;
+            const response = await fetch(apiUrl);
+            const datas = await response.json();
+
+            const sites = datas.map(site => `<option value="${site}">${site}</option>`);
+
+            selDistricts.innerHTML = sites.join('');
+        }
+
+
+
     </script>
 </body>
 
